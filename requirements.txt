@@ -1,0 +1,6 @@
+openai
+python-dotenv
+flask
+
+opencv-python
+numpy

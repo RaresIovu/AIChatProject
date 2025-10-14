@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Detectare figuri geometrice</title>
+  </head>
+  <body>
+    <h1>Upload imagine pentru detectarea formelor</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="image" required />
+      <button type="submit">Trimite</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+      const form = document.getElementById("uploadForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fileInput = form.querySelector('input[name="image"]');
+        const formData = new FormData();
+        formData.append("image", fileInput.files[0]);
+
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          document.getElementById("results").innerHTML = data.error;
+        } else {
+          document.getElementById("results").innerHTML = `
+                    <p>Triunghiuri: ${data.shapes.triangle}</p>
+                    <p>Pătrate: ${data.shapes.square}</p>
+                    <p>Cercuri: ${data.shapes.circle}</p>
+                    <img src="${data.processed_image}" width="400">
+                `;
+        }
+      });
+    </script>
+  </body>
+</html>
