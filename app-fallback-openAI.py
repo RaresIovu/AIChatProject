@@ -40,20 +40,55 @@ def upload():
     img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (3,3), 0)
-    edges = cv2.Canny(blur, 30, 100)  # lower thresholds to catch faint edges
+    edges = cv2.Canny(blur, 30, 100)
     edges = cv2.dilate(edges, None, iterations=1)
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    shapes = {"triangle": 0, "square": 0, "circle": 0}
-    dbg = 0
+    shapes = [
+        {"name":"Triunghiuri","count": 0},
+        {"name":"Pătrate","count": 0},
+        {"name":"Dreptunghiuri","count": 0},
+        {"name":"Pentagoane","count": 0},
+        {"name":"Cercuri","count": 0}
+    ]
+    def increment(name):
+        for shape in shapes:
+            if shape["name"] == name:
+                shape["count"] += 1
+                break
     for cnt in contours:
-        dbg += 1
+        label = ""
         approx = cv2.approxPolyDP(cnt,  0.04 * cv2.arcLength(cnt, True), True)
         if len(approx) == 3:
-            shapes["triangle"] += 1
+            increment("Triunghiuri")
+            label = "Triunghi"
         elif len(approx) == 4:
-            shapes["square"] += 1
+            _,_,w,h = cv2.boundingRect(approx)
+            aspectRatio = w / float(h)
+            if 0.9 < aspectRatio < 1.1:
+                increment("Pătrate")
+                label = "Patrat"
+            else:
+                increment("Dreptunghiuri")
+                label = "Dreptunghi"
+        elif len(approx) == 5:
+            increment("Pentagoane")
+            label = "Pentagon"
         else:
-            shapes["circle"] += 1
+            increment("Cercuri")
+            label = "Cerc"
+        m = cv2.moments(cnt)
+        cx = int(m["m10"]/m["m00"])
+        cy = int(m["m01"]/m["m00"])
+        brightness = gray[cy,cx]
+        print("brightness is", brightness)
+        if brightness > 50:
+           text_color = (0,0,0)
+        else:
+           text_color = (255,255,255)
+        (text_width, text_height),_ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 1.2, 2)
+        x = cx - text_width // 2
+        y = cy - text_height // 2
+        cv2.putText(img, label, (x, y+30), cv2.FONT_HERSHEY_SIMPLEX, 1.2, text_color, 2)
         # Desenează contururile
         cv2.drawContours(img, [cnt], 0, (0, 255, 0), 2)
     # Salvează imaginea procesată în static/uploads

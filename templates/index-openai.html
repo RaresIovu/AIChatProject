@@ -30,7 +30,7 @@
           document.getElementById("results").innerHTML = data.error;
         } else {
           document.getElementById("results").innerHTML = `
-                    <p>Triunghiuri: ${data.shapes.triangle}</p>
+                    <p>Triunghiuri: ${data.shapes[0].count}</p>
                     <p>Pătrate: ${data.shapes.square}</p>
                     <p>Cercuri: ${data.shapes.circle}</p>
                     ${

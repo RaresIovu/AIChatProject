@@ -29,12 +29,20 @@
         if (data.error) {
           document.getElementById("results").innerHTML = data.error;
         } else {
-          document.getElementById("results").innerHTML = `
-                    <p>Triunghiuri: ${data.shapes.triangle}</p>
-                    <p>Pătrate: ${data.shapes.square}</p>
-                    <p>Cercuri: ${data.shapes.circle}</p>
-                    <img src="${data.processed_image}" width="400">
-                `;
+          const container = document.getElementById("results");
+          container.innerHTML = "";
+
+          data.shapes.forEach((shape) => {
+            const p = document.createElement("p");
+            p.textContent = `${shape.name}: ${shape.count}`;
+            if (shape.count > 0) {
+              container.appendChild(p);
+            }
+          });
+          const img = document.createElement("img");
+          img.src = data.processed_image;
+          img.width = 400;
+          container.appendChild(img);
         }
       });
     </script>
